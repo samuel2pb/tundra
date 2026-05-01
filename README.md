@@ -26,13 +26,25 @@ This repo holds **module definitions only**. A separate consumer repo wires thes
 - Terraform `>= 1.6.0`
 - AWS provider `~> 5.0`
 
-## CI
+## Pre-commit
 
-`.github/workflows/ci.yml` runs on every PR:
-- `terraform fmt -check -recursive`
-- `terraform validate` per module
-- `tflint` per module
-- `trivy config` scan
+Quality checks run locally via [`pre-commit`](https://pre-commit.com). Configuration is in `.pre-commit-config.yaml`. Install once per checkout:
+
+```sh
+pip install pre-commit  # or: brew install pre-commit
+pre-commit install
+```
+
+Hooks:
+- `terraform_fmt`
+- `terraform_validate` (with `-backend=false`)
+- `terraform_tflint` (uses `.tflint.hcl`)
+- `terraform_trivy` (HIGH and CRITICAL only)
+- whitespace, EOF newline, YAML, merge-conflict, large-file checks
+
+Run against everything on demand: `pre-commit run --all-files`.
+
+This repo intentionally has no CI workflow — checks are enforced at commit time on every contributor's machine.
 
 ## Consuming this repo
 
