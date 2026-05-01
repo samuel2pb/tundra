@@ -32,8 +32,8 @@ resource "aws_iam_role" "task" {
 
 data "aws_iam_policy_document" "task" {
   statement {
-    sid     = "S3BucketLevel"
-    effect  = "Allow"
+    sid    = "S3BucketLevel"
+    effect = "Allow"
     actions = [
       "s3:ListBucket",
       "s3:ListBucketMultipartUploads",
@@ -43,8 +43,8 @@ data "aws_iam_policy_document" "task" {
   }
 
   statement {
-    sid     = "S3ObjectLevel"
-    effect  = "Allow"
+    sid    = "S3ObjectLevel"
+    effect = "Allow"
     actions = [
       "s3:GetObject",
       "s3:GetObjectVersion",
@@ -59,8 +59,8 @@ data "aws_iam_policy_document" "task" {
   # Glue Data Catalog: account-wide read/write. Granted on catalog, databases,
   # tables, partitions, and user-defined functions.
   statement {
-    sid     = "GlueCatalogReadWrite"
-    effect  = "Allow"
+    sid    = "GlueCatalogReadWrite"
+    effect = "Allow"
     actions = [
       "glue:GetCatalogImportStatus",
       "glue:GetDatabase",
@@ -140,8 +140,8 @@ data "aws_iam_policy_document" "execution_extras" {
   dynamic "statement" {
     for_each = length(var.execution_role_secret_arns) > 0 ? [1] : []
     content {
-      sid     = "ReadSecrets"
-      effect  = "Allow"
+      sid    = "ReadSecrets"
+      effect = "Allow"
       actions = [
         "secretsmanager:GetSecretValue",
         "ssm:GetParameters",
