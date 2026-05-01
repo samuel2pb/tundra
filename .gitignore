@@ -14,3 +14,4 @@ override.tf.json
 terraform.rc
 .idea/
 .vscode/
+.claude/
