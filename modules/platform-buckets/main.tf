@@ -28,7 +28,7 @@ locals {
   expiration_days            = var.expiration_days_override == null ? local.defaults.expiration_days : var.expiration_days_override
   noncurrent_expiration_days = var.noncurrent_expiration_days_override == null ? local.defaults.noncurrent_expiration_days : var.noncurrent_expiration_days_override
 
-  is_tfstate     = var.purpose == "tfstate"
+  is_tfstate              = var.purpose == "tfstate"
   effective_force_destroy = local.is_tfstate ? false : var.force_destroy
 }
 
@@ -173,9 +173,9 @@ data "aws_iam_policy_document" "this" {
   dynamic "statement" {
     for_each = var.purpose == "logs" ? [1] : []
     content {
-      sid     = "AllowLogDeliveryWrite"
-      effect  = "Allow"
-      actions = ["s3:PutObject"]
+      sid       = "AllowLogDeliveryWrite"
+      effect    = "Allow"
+      actions   = ["s3:PutObject"]
       resources = ["${aws_s3_bucket.this.arn}/*"]
 
       principals {
@@ -203,9 +203,9 @@ data "aws_iam_policy_document" "this" {
   dynamic "statement" {
     for_each = var.purpose == "logs" ? [1] : []
     content {
-      sid     = "AllowLogDeliveryAclCheck"
-      effect  = "Allow"
-      actions = ["s3:GetBucketAcl"]
+      sid       = "AllowLogDeliveryAclCheck"
+      effect    = "Allow"
+      actions   = ["s3:GetBucketAcl"]
       resources = [aws_s3_bucket.this.arn]
 
       principals {

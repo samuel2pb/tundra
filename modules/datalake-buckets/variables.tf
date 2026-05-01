@@ -1,5 +1,5 @@
 variable "name_prefix" {
-  description = "Bucket name prefix. Final bucket name is \"${name_prefix}-${zone}\"."
+  description = "Bucket name prefix. Final bucket name is \"$${name_prefix}-$${zone}\"."
   type        = string
 }
 

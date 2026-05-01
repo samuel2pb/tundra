@@ -1,5 +1,5 @@
 variable "name" {
-  description = "Bucket name. Caller is responsible for naming convention (e.g. \"${account}-${env}-tfstate\")."
+  description = "Bucket name. Caller is responsible for naming convention (e.g. \"$${account}-$${env}-tfstate\")."
   type        = string
 }
 

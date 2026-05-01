@@ -77,7 +77,7 @@ variable "secrets" {
 }
 
 variable "log_group_name" {
-  description = "CloudWatch log group name. Defaults to /ecs/${family}."
+  description = "CloudWatch log group name. Defaults to /ecs/$${family}."
   type        = string
   default     = null
 }
