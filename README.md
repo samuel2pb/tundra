@@ -10,7 +10,9 @@
   <img src="https://img.shields.io/badge/region-us--east--1-blue" alt="Region">
 </p>
 
-A small, opinionated Terraform module library for spinning up the AWS pieces of a Fargate-based data lake: S3 zones, operational buckets, a minimal VPC, and an ECS cluster with task roles and task definitions.
+A small, opinionated Terraform module library for spinning up the cloud pieces of a Fargate-based data lake: S3 zones, operational buckets, a minimal VPC, and an ECS cluster with task roles and task definitions.
+
+Modules are organised by provider under `modules/<provider>/`. The library currently ships AWS modules (`modules/aws/...`); GCP and Azure equivalents will land under `modules/gcp/` and `modules/azure/` as the platform expands.
 
 This repository contains **module definitions only** — no backend config, no compositions, no apply pipeline. A consumer repository wires the modules together and runs `terraform apply`.
 
@@ -26,14 +28,24 @@ If you need a 200-variable VPC module, look elsewhere. If you want something you
 
 ## Modules
 
+### AWS (`modules/aws/`)
+
 | module | purpose |
 |---|---|
-| [`datalake-buckets`](modules/datalake-buckets) | One S3 bucket per data lake zone (default `raw`, `sot`, `smt`) |
-| [`platform-buckets`](modules/platform-buckets) | Operational buckets (`tfstate`, `logs`, `artifacts`, `athena`) |
-| [`vpc`](modules/vpc) | Smallest Fargate-friendly VPC (public subnets, no NAT) |
-| [`ecs-cluster`](modules/ecs-cluster) | ECS cluster with `FARGATE` + `FARGATE_SPOT` capacity providers |
-| [`ecs-task-definition`](modules/ecs-task-definition) | Fargate task definition + CloudWatch log group |
-| [`iam-container-role`](modules/iam-container-role) | Task role (Glue catalog + S3 RW) and execution role |
+| [`datalake-buckets`](modules/aws/datalake-buckets) | One S3 bucket per data lake zone (default `raw`, `sot`, `smt`) |
+| [`platform-buckets`](modules/aws/platform-buckets) | Operational buckets (`tfstate`, `logs`, `artifacts`, `athena`) |
+| [`vpc`](modules/aws/vpc) | Smallest Fargate-friendly VPC (public subnets, no NAT) |
+| [`ecs-cluster`](modules/aws/ecs-cluster) | ECS cluster with `FARGATE` + `FARGATE_SPOT` capacity providers |
+| [`ecs-task-definition`](modules/aws/ecs-task-definition) | Fargate task definition + CloudWatch log group |
+| [`iam-container-role`](modules/aws/iam-container-role) | Task role (Glue catalog + S3 RW) and execution role |
+
+### GCP (`modules/gcp/`)
+
+Planned. Not yet shipped.
+
+### Azure (`modules/azure/`)
+
+Planned. Not yet shipped.
 
 Each module has its own README with inputs, outputs, and usage notes.
 
@@ -55,7 +67,7 @@ Reference modules from a consumer repo via Git source:
 
 ```hcl
 module "buckets" {
-  source = "git::https://github.com/samuel2pb/tundra.git//modules/datalake-buckets?ref=v0.1.0"
+  source = "git::https://github.com/samuel2pb/tundra.git//modules/aws/datalake-buckets?ref=v0.1.0"
 
   name_prefix = "myorg-prod-datalake"
   tags = {
