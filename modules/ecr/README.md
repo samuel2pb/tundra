@@ -1,6 +1,6 @@
 # ecr
 
-Provisions an ECR repository with image scanning on push, immutable tags, and a lifecycle policy.
+Provisions an ECR repository with image scanning on push, mutable tags, and a lifecycle policy.
 
 ## Inputs
 
@@ -8,7 +8,7 @@ Provisions an ECR repository with image scanning on push, immutable tags, and a 
 |---|---|---|---|
 | `repo_name` | string | — | yes |
 | `tags` | map(string) | — | yes (must include `domain`, `platform`, `project`) |
-| `image_tag_mutability` | string | `IMMUTABLE` | no |
+| `image_tag_mutability` | string | `MUTABLE` | no |
 | `scan_on_push` | bool | `true` | no |
 | `encryption_type` | string | `AES256` | no |
 | `kms_key_arn` | string | `null` | no |

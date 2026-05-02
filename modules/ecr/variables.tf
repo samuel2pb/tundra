@@ -16,7 +16,7 @@ variable "tags" {
 variable "image_tag_mutability" {
   description = "ECR image tag mutability."
   type        = string
-  default     = "IMMUTABLE"
+  default     = "MUTABLE"
 
   validation {
     condition     = contains(["MUTABLE", "IMMUTABLE"], var.image_tag_mutability)
