@@ -20,7 +20,7 @@ Fargate-compatible ECS task definition with a single container, plus its CloudWa
 | `environment` | list(object) | `[]` | no |
 | `secrets` | list(object) | `[]` | no |
 | `log_group_name` | string | `/ecs/${family}` | no |
-| `log_retention_days` | number | `30` | no |
+| `log_retention_days` | number | `7` | no |
 | `ephemeral_storage_gib` | number | `0` (Fargate default 21) | no |
 | `runtime_platform` | object | `LINUX` / `X86_64` | no |
 
