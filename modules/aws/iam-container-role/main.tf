@@ -4,7 +4,7 @@ data "aws_caller_identity" "current" {}
 
 locals {
   partition  = data.aws_partition.current.partition
-  region     = data.aws_region.current.name
+  region     = data.aws_region.current.region
   account_id = data.aws_caller_identity.current.account_id
 
   bucket_object_arns = [for a in var.bucket_arns : "${a}/*"]
@@ -62,6 +62,7 @@ data "aws_iam_policy_document" "task" {
     sid    = "GlueCatalogReadWrite"
     effect = "Allow"
     actions = [
+      "glue:GetCatalog",
       "glue:GetCatalogImportStatus",
       "glue:GetDatabase",
       "glue:GetDatabases",
