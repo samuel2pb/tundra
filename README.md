@@ -1,5 +1,9 @@
 # tundra
 
+<p align="center">
+  <img src="./docs/img/logo.png" alt="awebo" width="480" />
+</p>
+
 Terraform module library for the data lake. Companion to [`awebo`](#) (data lake utility).
 
 This repo holds **module definitions only**. A separate consumer repo wires these modules into account compositions and runs `terraform apply`.
