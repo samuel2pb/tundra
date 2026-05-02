@@ -4,6 +4,7 @@ Terraform modules targeting the AWS provider.
 
 | module | purpose |
 |---|---|
+| [`main`](main) | Top-level composition that wires every leaf module below into a single Fargate-on-AWS stack |
 | [`datalake-buckets`](datalake-buckets) | One S3 bucket per data lake zone (default `raw`, `sot`, `smt`) |
 | [`platform-buckets`](platform-buckets) | Operational buckets (`tfstate`, `logs`, `artifacts`, `athena`) |
 | [`vpc`](vpc) | Smallest Fargate-friendly VPC (public subnets, no NAT) |
@@ -12,3 +13,8 @@ Terraform modules targeting the AWS provider.
 | [`iam-container-role`](iam-container-role) | Task role (Glue catalog + S3 RW) and execution role |
 
 All modules pin `aws ~> 5.0` and Terraform `>= 1.6.0`. See each module's README for inputs and outputs.
+
+## Choosing between `main` and the leaf modules
+
+- Use [`main`](main) when you want the whole stack with opinionated defaults (single `name_prefix`, predictable child resource names, optional task definition).
+- Call a leaf module directly when you need a partial deploy, custom names, or want to compose the stack across separate Terraform states.

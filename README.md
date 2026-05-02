@@ -32,12 +32,15 @@ If you need a 200-variable VPC module, look elsewhere. If you want something you
 
 | module | purpose |
 |---|---|
+| [`main`](modules/aws/main) | **Top-level composition.** Wires every other AWS module together for the full stack from a single module call. |
 | [`datalake-buckets`](modules/aws/datalake-buckets) | One S3 bucket per data lake zone (default `raw`, `sot`, `smt`) |
 | [`platform-buckets`](modules/aws/platform-buckets) | Operational buckets (`tfstate`, `logs`, `artifacts`, `athena`) |
 | [`vpc`](modules/aws/vpc) | Smallest Fargate-friendly VPC (public subnets, no NAT) |
 | [`ecs-cluster`](modules/aws/ecs-cluster) | ECS cluster with `FARGATE` + `FARGATE_SPOT` capacity providers |
 | [`ecs-task-definition`](modules/aws/ecs-task-definition) | Fargate task definition + CloudWatch log group |
 | [`iam-container-role`](modules/aws/iam-container-role) | Task role (Glue catalog + S3 RW) and execution role |
+
+If you want the whole stack with sane defaults, use [`aws/main`](modules/aws/main). If you need a custom layout, call the leaf modules directly.
 
 ### GCP (`modules/gcp/`)
 
@@ -63,20 +66,38 @@ Each module has its own README with inputs, outputs, and usage notes.
 
 ## Usage
 
-Reference modules from a consumer repo via Git source:
+Reference modules from a consumer repo via Git source. The fastest path is the [`aws/main`](modules/aws/main) composition:
 
 ```hcl
-module "buckets" {
-  source = "git::https://github.com/samuel2pb/tundra.git//modules/aws/datalake-buckets?ref=v0.1.0"
+module "platform" {
+  source = "git::https://github.com/samuel2pb/tundra.git//modules/aws/main?ref=v0.2.0"
 
-  name_prefix = "myorg-prod-datalake"
+  name_prefix = "myorg-prod"
   tags = {
     domain   = "data"
     platform = "datalake"
     project  = "example"
   }
 
-  # Optional: publish bucket IDs/ARNs to SSM so downstream tools can resolve them.
+  ssm_path_prefix = "/myorg/prod"
+
+  task_image = "${aws_ecr_repository.app.repository_url}:0.1.0"
+}
+```
+
+Or call a leaf module directly when you need finer control:
+
+```hcl
+module "buckets" {
+  source = "git::https://github.com/samuel2pb/tundra.git//modules/aws/datalake-buckets?ref=v0.2.0"
+
+  name_prefix = "myorg-prod"
+  tags = {
+    domain   = "data"
+    platform = "datalake"
+    project  = "example"
+  }
+
   ssm_path_prefix = "/myorg/prod/datalake"
 }
 ```

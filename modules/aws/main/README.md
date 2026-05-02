@@ -1,0 +1,84 @@
+# aws/main
+
+Top-level composition that wires every AWS module together. Use this when you want the full Fargate-on-AWS data lake stack — VPC, S3 zones, operational buckets, ECS cluster, IAM roles, and task definition — provisioned from a single module call.
+
+If you need a custom layout (different naming, partial resources, separate state), call the underlying modules directly instead.
+
+## What it provisions
+
+- A `/27` VPC with public-only subnets (`vpc`)
+- One bucket per data lake zone (`datalake-buckets`)
+- Operational buckets selected via `platform_buckets` (`platform-buckets`)
+- ECS cluster with Fargate + Fargate Spot (`ecs-cluster`)
+- Task and execution IAM roles, scoped to the data lake buckets (`iam-container-role`)
+- Optional Fargate task definition + log group (`ecs-task-definition`) — created only when `task_image` is set
+
+## Inputs
+
+| name | type | default | required |
+|---|---|---|---|
+| `name_prefix` | string | — | yes |
+| `tags` | map(string) | — | yes (must include `domain`, `platform`, `project`) |
+| `region` | string | `us-east-1` | no |
+| `ssm_path_prefix` | string | `null` | no — when set, every child module publishes outputs under sub-paths |
+| `vpc_cidr_block` | string | `10.0.0.0/27` | no |
+| `vpc_az_count` | number | `2` | no |
+| `datalake_zones` | list(string) | `["raw","sot","smt"]` | no |
+| `datalake_kms_key_arn` | string | `null` | no |
+| `platform_buckets` | list(string) | `["tfstate","logs","artifacts","athena"]` | no — pass `[]` to skip |
+| `default_capacity_provider` | string | `FARGATE_SPOT` | no |
+| `enable_container_insights` | bool | `true` | no |
+| `additional_task_policy_statements` | any | `[]` | no |
+| `execution_role_kms_key_arns` | list(string) | `[]` | no |
+| `execution_role_secret_arns` | list(string) | `[]` | no |
+| `task_image` | string | `null` | no — when null, the task definition is skipped |
+| `task_family` | string | `name_prefix` | no |
+| `task_cpu` | string | `512` | no |
+| `task_memory` | string | `1024` | no |
+| `task_command` | list(string) | `[]` | no |
+| `task_entrypoint` | list(string) | `[]` | no |
+| `task_environment` | list(object) | `[]` | no |
+| `task_secrets` | list(object) | `[]` | no |
+| `log_retention_days` | number | `7` | no |
+
+## Outputs
+
+- `vpc_id`, `public_subnet_ids`, `tasks_security_group_id`
+- `datalake_bucket_ids` / `datalake_bucket_arns` (maps `zone => value`)
+- `platform_bucket_ids` / `platform_bucket_arns` (maps `purpose => value`)
+- `cluster_arn`, `cluster_name`
+- `task_role_arn`, `execution_role_arn`
+- `task_definition_arn`, `task_definition_arn_without_revision`, `log_group_name` — `null` when `task_image` is unset
+
+## Naming
+
+Every resource derives its name from `name_prefix`:
+
+- VPC: `${name_prefix}`
+- Data lake buckets: `${name_prefix}-${zone}` (e.g. `myorg-prod-raw`)
+- Operational buckets: `${name_prefix}-${purpose}` (e.g. `myorg-prod-tfstate`)
+- ECS cluster: `${name_prefix}`
+- IAM roles: `${name_prefix}-task`, `${name_prefix}-execution`
+- Task family: `${task_family}` (defaults to `name_prefix`)
+
+## Example
+
+```hcl
+module "platform" {
+  source = "git::https://github.com/samuel2pb/tundra.git//modules/aws/main?ref=v0.2.0"
+
+  name_prefix = "myorg-prod"
+  tags = {
+    domain   = "data"
+    platform = "datalake"
+    project  = "example"
+  }
+
+  ssm_path_prefix = "/myorg/prod"
+
+  task_image = "${aws_ecr_repository.app.repository_url}:0.1.0"
+  task_environment = [
+    { name = "ENV", value = "prod" },
+  ]
+}
+```
