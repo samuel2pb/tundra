@@ -105,3 +105,9 @@ variable "runtime_platform" {
     cpu_architecture        = "X86_64"
   }
 }
+
+variable "ssm_path_prefix" {
+  description = "If set, writes outputs to SSM Parameter Store under this path. e.g. /dodpit/prod/ecs/task/awebo."
+  type        = string
+  default     = null
+}

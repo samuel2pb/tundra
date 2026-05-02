@@ -58,3 +58,9 @@ variable "log_delivery_source_account_ids" {
   type        = list(string)
   default     = []
 }
+
+variable "ssm_path_prefix" {
+  description = "If set, writes outputs to SSM Parameter Store under this path. e.g. /dodpit/prod/buckets/tfstate."
+  type        = string
+  default     = null
+}

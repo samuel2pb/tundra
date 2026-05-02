@@ -35,3 +35,9 @@ variable "execution_role_secret_arns" {
   type        = list(string)
   default     = []
 }
+
+variable "ssm_path_prefix" {
+  description = "If set, writes outputs to SSM Parameter Store under this path. e.g. /dodpit/prod/iam/awebo."
+  type        = string
+  default     = null
+}

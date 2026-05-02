@@ -14,7 +14,7 @@ This repo holds **module definitions only**. A separate consumer repo wires thes
 |---|---|
 | [`datalake-buckets`](modules/datalake-buckets) | S3 buckets per zone (`raw`, `sot`, `smt`) |
 | [`platform-buckets`](modules/platform-buckets) | Operational buckets (`tfstate`, `logs`, `artifacts`, `athena`) |
-| [`ecr`](modules/ecr) | ECR repository for the awebo image |
+| [`vpc`](modules/vpc) | Smallest VPC for Fargate (public subnets, no NAT) |
 | [`ecs-cluster`](modules/ecs-cluster) | ECS cluster with FARGATE + FARGATE_SPOT capacity providers |
 | [`ecs-task-definition`](modules/ecs-task-definition) | Awebo Fargate task definition + log group |
 | [`iam-container-role`](modules/iam-container-role) | Task role (Glue catalog + S3 RW) + execution role |

@@ -36,3 +36,9 @@ variable "abort_incomplete_multipart_upload_days" {
   type        = number
   default     = 7
 }
+
+variable "ssm_path_prefix" {
+  description = "If set, writes outputs to SSM Parameter Store under this path. e.g. /dodpit/prod/datalake."
+  type        = string
+  default     = null
+}
