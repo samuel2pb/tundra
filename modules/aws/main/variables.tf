@@ -104,9 +104,20 @@ variable "enable_container_insights" {
 # --- IAM container role --------------------------------------------------
 
 variable "additional_task_policy_statements" {
-  description = "Optional extra IAM statements appended to the task policy."
+  description = "Optional extra IAM statements appended to the task policy. These are merged on top of the module's own defaults (RW on the platform buckets listed in var.task_accessible_platform_buckets)."
   type        = any
   default     = []
+}
+
+variable "task_accessible_platform_buckets" {
+  description = "Platform-bucket purposes the task role should be granted S3 read/write on. Each entry must also be present in var.platform_buckets to take effect. Pass [] to disable the default platform-bucket grant."
+  type        = list(string)
+  default     = ["athena", "artifacts"]
+
+  validation {
+    condition     = alltrue([for p in var.task_accessible_platform_buckets : contains(["tfstate", "logs", "artifacts", "athena"], p)])
+    error_message = "task_accessible_platform_buckets entries must each be one of: tfstate, logs, artifacts, athena."
+  }
 }
 
 variable "execution_role_kms_key_arns" {

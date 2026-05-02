@@ -15,6 +15,34 @@ locals {
   create_task       = var.task_image != null
   platform_set      = toset(var.platform_buckets)
   datalake_arns_all = values(module.datalake_buckets.bucket_arns)
+
+  task_platform_bucket_purposes = [
+    for p in var.task_accessible_platform_buckets : p if contains(var.platform_buckets, p)
+  ]
+
+  task_platform_bucket_arns = flatten([
+    for p in local.task_platform_bucket_purposes : [
+      module.platform_buckets[p].bucket_arn,
+      "${module.platform_buckets[p].bucket_arn}/*",
+    ]
+  ])
+
+  default_task_policy_statements = length(local.task_platform_bucket_arns) > 0 ? [
+    {
+      sid    = "PlatformBuckets"
+      effect = "Allow"
+      actions = [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject",
+        "s3:ListBucket",
+        "s3:GetBucketLocation",
+      ]
+      resources = local.task_platform_bucket_arns
+    },
+  ] : []
+
+  combined_task_policy_statements = concat(local.default_task_policy_statements, var.additional_task_policy_statements)
 }
 
 check "account_id_matches_provider" {
@@ -74,7 +102,7 @@ module "iam_container_role" {
   name_prefix                       = local.effective_name_prefix
   tags                              = local.effective_tags
   bucket_arns                       = local.datalake_arns_all
-  additional_task_policy_statements = var.additional_task_policy_statements
+  additional_task_policy_statements = local.combined_task_policy_statements
   execution_role_kms_key_arns       = var.execution_role_kms_key_arns
   execution_role_secret_arns        = var.execution_role_secret_arns
 

@@ -32,7 +32,8 @@ The minimum a caller has to provide is **`account_id`**, **`account_name`**, and
 | `platform_buckets` | list(string) | `["tfstate","logs","artifacts","athena"]` | no — pass `[]` to skip |
 | `default_capacity_provider` | string | `FARGATE_SPOT` | no |
 | `enable_container_insights` | bool | `true` | no |
-| `additional_task_policy_statements` | any | `[]` | no |
+| `task_accessible_platform_buckets` | list(string) | `["athena","artifacts"]` | no — purposes (subset of `platform_buckets`) the task role gets S3 RW on |
+| `additional_task_policy_statements` | any | `[]` | no — merged on top of the platform-bucket grant above |
 | `execution_role_kms_key_arns` | list(string) | `[]` | no |
 | `execution_role_secret_arns` | list(string) | `[]` | no |
 | `task_image` | string | `null` | no — when null, the task definition is skipped |
@@ -75,6 +76,19 @@ Unless overridden, the module derives:
 - **Tags** = caller-supplied `tags` plus `account_id` and `account_name` injected automatically.
 
 The module also asserts at plan time that the active AWS provider's account matches `var.account_id`, so a misconfigured provider never silently deploys into the wrong account.
+
+## Default IAM grants on the task role
+
+The leaf [`iam-container-role`](../iam-container-role) module already grants the task role:
+
+- S3 read/write on every data lake bucket created by this composition
+- Account-wide Glue Data Catalog read/write
+
+This module adds one more default on top:
+
+- S3 read/write on the platform buckets listed in `task_accessible_platform_buckets` (default `athena` and `artifacts`), but only when those purposes are also present in `platform_buckets`.
+
+To disable the platform-bucket grant entirely, set `task_accessible_platform_buckets = []`. To extend the policy further, append to `additional_task_policy_statements`.
 
 ## Examples
 
