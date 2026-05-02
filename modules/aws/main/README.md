@@ -15,12 +15,16 @@ If you need a custom layout (different naming, partial resources, separate state
 
 ## Inputs
 
+The minimum a caller has to provide is **`account_id`**, **`account_name`**, and **`tags`**. Everything else has a default that you can override per use case.
+
 | name | type | default | required |
 |---|---|---|---|
-| `name_prefix` | string | — | yes |
-| `tags` | map(string) | — | yes (must include `domain`, `platform`, `project`) |
+| `account_id` | string | — | yes (12-digit AWS account ID) |
+| `account_name` | string | — | yes (lowercase, dashes allowed; used as default name prefix and SSM root) |
+| `tags` | map(string) | — | yes (must include `domain`, `platform`, `project`; the module merges `account_id` and `account_name` automatically) |
 | `region` | string | `us-east-1` | no |
-| `ssm_path_prefix` | string | `null` | no — when set, every child module publishes outputs under sub-paths |
+| `name_prefix` | string | `account_name` | no — override only when you want a different prefix from the account name |
+| `ssm_path_prefix` | string | `/${account_name}` | no — pass `""` to disable SSM publication |
 | `vpc_cidr_block` | string | `10.0.0.0/27` | no |
 | `vpc_az_count` | number | `2` | no |
 | `datalake_zones` | list(string) | `["raw","sot","smt"]` | no |
@@ -50,30 +54,67 @@ If you need a custom layout (different naming, partial resources, separate state
 - `task_role_arn`, `execution_role_arn`
 - `task_definition_arn`, `task_definition_arn_without_revision`, `log_group_name` — `null` when `task_image` is unset
 
-## Naming
+## Defaults derived from `account_name`
 
-Every resource derives its name from `name_prefix`:
+Unless overridden, the module derives:
 
-- VPC: `${name_prefix}`
-- Data lake buckets: `${name_prefix}-${zone}` (e.g. `myorg-prod-raw`)
-- Operational buckets: `${name_prefix}-${purpose}` (e.g. `myorg-prod-tfstate`)
-- ECS cluster: `${name_prefix}`
-- IAM roles: `${name_prefix}-task`, `${name_prefix}-execution`
-- Task family: `${task_family}` (defaults to `name_prefix`)
+- **Name prefix** for every child resource = `account_name`
+  - VPC: `${account_name}`
+  - Data lake buckets: `${account_name}-${zone}` (e.g. `prod-raw`)
+  - Operational buckets: `${account_name}-${purpose}` (e.g. `prod-tfstate`)
+  - ECS cluster: `${account_name}`
+  - IAM roles: `${account_name}-task`, `${account_name}-execution`
+  - Task family: `${account_name}`
+- **SSM root path** = `/${account_name}`, with each module publishing under a sub-path:
+  - `/${account_name}/vpc/...`
+  - `/${account_name}/datalake/...`
+  - `/${account_name}/buckets/${purpose}/...`
+  - `/${account_name}/ecs/cluster/...`
+  - `/${account_name}/ecs/task/...`
+  - `/${account_name}/iam/...`
+- **Tags** = caller-supplied `tags` plus `account_id` and `account_name` injected automatically.
 
-## Example
+The module also asserts at plan time that the active AWS provider's account matches `var.account_id`, so a misconfigured provider never silently deploys into the wrong account.
+
+## Examples
+
+**Minimal — use everything default:**
 
 ```hcl
 module "platform" {
-  source = "git::https://github.com/samuel2pb/tundra.git//modules/aws/main?ref=v0.2.0"
+  source = "git::https://github.com/samuel2pb/tundra.git//modules/aws/main?ref=v0.1.0"
 
-  name_prefix = "myorg-prod"
+  account_id   = "111122223333"
+  account_name = "prod"
+
+  tags = {
+    domain   = "data"
+    platform = "datalake"
+    project  = "example"
+  }
+}
+```
+
+**With a container image, custom region, and overrides:**
+
+```hcl
+module "platform" {
+  source = "git::https://github.com/samuel2pb/tundra.git//modules/aws/main?ref=v0.1.0"
+
+  account_id   = "111122223333"
+  account_name = "prod"
+  region       = "eu-west-1"
+
   tags = {
     domain   = "data"
     platform = "datalake"
     project  = "example"
   }
 
+  # Override the default name prefix
+  name_prefix = "myorg-prod"
+
+  # Override the default SSM root
   ssm_path_prefix = "/myorg/prod"
 
   task_image = "${aws_ecr_repository.app.repository_url}:0.1.0"

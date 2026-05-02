@@ -1,17 +1,34 @@
+data "aws_caller_identity" "current" {}
+
 locals {
-  ssm_root          = var.ssm_path_prefix
-  ssm_enabled       = local.ssm_root != null
-  task_family       = coalesce(var.task_family, var.name_prefix)
+  effective_name_prefix = coalesce(var.name_prefix, var.account_name)
+
+  effective_tags = merge(var.tags, {
+    account_id   = var.account_id
+    account_name = var.account_name
+  })
+
+  ssm_root    = var.ssm_path_prefix == null ? "/${var.account_name}" : var.ssm_path_prefix
+  ssm_enabled = local.ssm_root != ""
+
+  task_family       = coalesce(var.task_family, local.effective_name_prefix)
   create_task       = var.task_image != null
   platform_set      = toset(var.platform_buckets)
   datalake_arns_all = values(module.datalake_buckets.bucket_arns)
 }
 
+check "account_id_matches_provider" {
+  assert {
+    condition     = data.aws_caller_identity.current.account_id == var.account_id
+    error_message = "Configured AWS provider account (${data.aws_caller_identity.current.account_id}) does not match var.account_id (${var.account_id})."
+  }
+}
+
 module "vpc" {
   source = "../vpc"
 
-  name       = var.name_prefix
-  tags       = var.tags
+  name       = local.effective_name_prefix
+  tags       = local.effective_tags
   cidr_block = var.vpc_cidr_block
   az_count   = var.vpc_az_count
 
@@ -21,9 +38,9 @@ module "vpc" {
 module "datalake_buckets" {
   source = "../datalake-buckets"
 
-  name_prefix = var.name_prefix
+  name_prefix = local.effective_name_prefix
   zones       = var.datalake_zones
-  tags        = var.tags
+  tags        = local.effective_tags
   kms_key_arn = var.datalake_kms_key_arn
 
   ssm_path_prefix = local.ssm_enabled ? "${local.ssm_root}/datalake" : null
@@ -33,9 +50,9 @@ module "platform_buckets" {
   source   = "../platform-buckets"
   for_each = local.platform_set
 
-  name    = "${var.name_prefix}-${each.key}"
+  name    = "${local.effective_name_prefix}-${each.key}"
   purpose = each.key
-  tags    = var.tags
+  tags    = local.effective_tags
 
   ssm_path_prefix = local.ssm_enabled ? "${local.ssm_root}/buckets/${each.key}" : null
 }
@@ -43,8 +60,8 @@ module "platform_buckets" {
 module "ecs_cluster" {
   source = "../ecs-cluster"
 
-  name                      = var.name_prefix
-  tags                      = var.tags
+  name                      = local.effective_name_prefix
+  tags                      = local.effective_tags
   default_capacity_provider = var.default_capacity_provider
   enable_container_insights = var.enable_container_insights
 
@@ -54,8 +71,8 @@ module "ecs_cluster" {
 module "iam_container_role" {
   source = "../iam-container-role"
 
-  name_prefix                       = var.name_prefix
-  tags                              = var.tags
+  name_prefix                       = local.effective_name_prefix
+  tags                              = local.effective_tags
   bucket_arns                       = local.datalake_arns_all
   additional_task_policy_statements = var.additional_task_policy_statements
   execution_role_kms_key_arns       = var.execution_role_kms_key_arns
@@ -70,7 +87,7 @@ module "ecs_task_definition" {
 
   family             = local.task_family
   image              = var.task_image
-  tags               = var.tags
+  tags               = local.effective_tags
   task_role_arn      = module.iam_container_role.task_role_arn
   execution_role_arn = module.iam_container_role.execution_role_arn
   region             = var.region

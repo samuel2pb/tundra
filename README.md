@@ -70,17 +70,18 @@ Reference modules from a consumer repo via Git source. The fastest path is the [
 
 ```hcl
 module "platform" {
-  source = "git::https://github.com/samuel2pb/tundra.git//modules/aws/main?ref=v0.2.0"
+  source = "git::https://github.com/samuel2pb/tundra.git//modules/aws/main?ref=v0.1.0"
 
-  name_prefix = "myorg-prod"
+  account_id   = "111122223333"
+  account_name = "prod"
+
   tags = {
     domain   = "data"
     platform = "datalake"
     project  = "example"
   }
 
-  ssm_path_prefix = "/myorg/prod"
-
+  # Optional. Provide an image to also create the Fargate task definition.
   task_image = "${aws_ecr_repository.app.repository_url}:0.1.0"
 }
 ```
@@ -89,7 +90,7 @@ Or call a leaf module directly when you need finer control:
 
 ```hcl
 module "buckets" {
-  source = "git::https://github.com/samuel2pb/tundra.git//modules/aws/datalake-buckets?ref=v0.2.0"
+  source = "git::https://github.com/samuel2pb/tundra.git//modules/aws/datalake-buckets?ref=v0.1.0"
 
   name_prefix = "myorg-prod"
   tags = {

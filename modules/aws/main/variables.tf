@@ -1,10 +1,25 @@
-variable "name_prefix" {
-  description = "Name prefix used for every child resource. Final names look like \"$${name_prefix}-vpc\", \"$${name_prefix}-raw\", \"$${name_prefix}-tfstate\", \"$${name_prefix}-cluster\"."
+variable "account_id" {
+  description = "AWS account ID this stack is deployed into. Used to validate the active provider, propagated as a resource tag, and inserted into the default ssm_path_prefix."
   type        = string
+
+  validation {
+    condition     = can(regex("^[0-9]{12}$", var.account_id))
+    error_message = "account_id must be a 12-digit AWS account ID."
+  }
+}
+
+variable "account_name" {
+  description = "Short, friendly name for the account (e.g. \"prod\", \"dodpit\"). Used as the default name prefix for every child resource and inserted into the default ssm_path_prefix."
+  type        = string
+
+  validation {
+    condition     = can(regex("^[a-z0-9][a-z0-9-]*$", var.account_name))
+    error_message = "account_name must be lowercase alphanumeric and dashes, starting with a letter or digit."
+  }
 }
 
 variable "tags" {
-  description = "Tags applied to every resource. Must include domain, platform, project."
+  description = "Caller-supplied tags. Must include domain, platform, project. The module merges account_id and account_name on top automatically."
   type        = map(string)
 
   validation {
@@ -19,8 +34,14 @@ variable "region" {
   default     = "us-east-1"
 }
 
+variable "name_prefix" {
+  description = "Override for the name prefix used on every child resource. When null (default), the module uses var.account_name."
+  type        = string
+  default     = null
+}
+
 variable "ssm_path_prefix" {
-  description = "Optional root SSM path. When set, every child module publishes outputs under sub-paths (e.g. \"$${ssm_path_prefix}/vpc\", \"$${ssm_path_prefix}/datalake\")."
+  description = "Override for the root SSM path. When null (default), the module uses \"/$${account_name}\". Pass an explicit value to use a different layout, or pass an empty string to disable SSM publication entirely."
   type        = string
   default     = null
 }
@@ -109,7 +130,7 @@ variable "task_image" {
 }
 
 variable "task_family" {
-  description = "Task definition family. Defaults to name_prefix."
+  description = "Task definition family. Defaults to the effective name prefix."
   type        = string
   default     = null
 }
