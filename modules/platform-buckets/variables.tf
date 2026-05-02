@@ -60,7 +60,7 @@ variable "log_delivery_source_account_ids" {
 }
 
 variable "ssm_path_prefix" {
-  description = "If set, writes outputs to SSM Parameter Store under this path. e.g. /dodpit/prod/buckets/tfstate."
+  description = "If set, writes outputs to SSM Parameter Store under this path. e.g. /myorg/prod/buckets/tfstate."
   type        = string
   default     = null
 }

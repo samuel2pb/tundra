@@ -31,7 +31,7 @@ variable "az_count" {
 }
 
 variable "ssm_path_prefix" {
-  description = "If set, writes outputs to SSM Parameter Store under this path. e.g. /dodpit/prod/vpc."
+  description = "If set, writes outputs to SSM Parameter Store under this path. e.g. /myorg/prod/vpc."
   type        = string
   default     = null
 }

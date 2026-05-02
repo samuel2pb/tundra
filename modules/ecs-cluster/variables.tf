@@ -31,7 +31,7 @@ variable "enable_container_insights" {
 }
 
 variable "ssm_path_prefix" {
-  description = "If set, writes outputs to SSM Parameter Store under this path. e.g. /dodpit/prod/ecs/cluster."
+  description = "If set, writes outputs to SSM Parameter Store under this path. e.g. /myorg/prod/ecs/cluster."
   type        = string
   default     = null
 }

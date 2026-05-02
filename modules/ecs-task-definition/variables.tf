@@ -107,7 +107,7 @@ variable "runtime_platform" {
 }
 
 variable "ssm_path_prefix" {
-  description = "If set, writes outputs to SSM Parameter Store under this path. e.g. /dodpit/prod/ecs/task/awebo."
+  description = "If set, writes outputs to SSM Parameter Store under this path. e.g. /myorg/prod/ecs/task/awebo."
   type        = string
   default     = null
 }

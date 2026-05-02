@@ -58,7 +58,7 @@ Reference modules from a consumer repo via Git source:
 module "buckets" {
   source = "git::https://github.com/samuel2pb/tundra.git//modules/datalake-buckets?ref=v0.1.0"
 
-  name_prefix = "dodpit-prod-datalake"
+  name_prefix = "myorg-prod-datalake"
   tags = {
     domain   = "data"
     platform = "datalake"
