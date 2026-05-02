@@ -26,12 +26,17 @@ All buckets get: SSE (AES256 by default), public access block, `BucketOwnerEnfor
 | `expiration_days_override` | number | `null` (0 disables) | no |
 | `noncurrent_expiration_days_override` | number | `null` (0 disables) | no |
 | `log_delivery_source_account_ids` | list(string) | `[]` | no (only for `purpose=logs`) |
+| `ssm_path_prefix` | string | `null` | no — when set, publishes outputs to SSM Parameter Store |
 
 ## Outputs
 
 - `bucket_id`
 - `bucket_arn`
 - `bucket_domain_name`
+
+When `ssm_path_prefix` is set (e.g. `/myorg/prod/buckets/tfstate`), the module writes:
+
+- `${prefix}/id`, `${prefix}/arn`, `${prefix}/fqdn`
 
 ## Caller's job
 

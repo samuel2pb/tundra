@@ -15,6 +15,7 @@ Two IAM roles for an ECS container workload:
 | `additional_task_policy_statements` | any | `[]` | no |
 | `execution_role_kms_key_arns` | list(string) | `[]` | no |
 | `execution_role_secret_arns` | list(string) | `[]` | no |
+| `ssm_path_prefix` | string | `null` | no — when set, publishes role ARNs/names to SSM Parameter Store |
 
 `bucket_arns` should be the bucket-level ARNs (e.g. `arn:aws:s3:::my-bucket`). Both bucket-level and `bucket/*` actions are granted.
 
@@ -22,3 +23,5 @@ Two IAM roles for an ECS container workload:
 
 - `task_role_arn`, `task_role_name`
 - `execution_role_arn`, `execution_role_name`
+
+When `ssm_path_prefix` is set, all four outputs are published as `${prefix}/<output_name>`.

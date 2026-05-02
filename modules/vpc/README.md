@@ -20,6 +20,7 @@ No NAT gateway, no private subnets, no VPC endpoints. Cost is the IGW (free) + d
 | `tags` | map(string) | — | yes (must include `domain`, `platform`, `project`) |
 | `cidr_block` | string | `10.0.0.0/27` | no |
 | `az_count` | number | `2` | no |
+| `ssm_path_prefix` | string | `null` | no — when set, publishes outputs to SSM Parameter Store |
 
 ## Outputs
 
@@ -29,6 +30,8 @@ No NAT gateway, no private subnets, no VPC endpoints. Cost is the IGW (free) + d
 - `availability_zones`
 - `internet_gateway_id`
 - `tasks_security_group_id`
+
+When `ssm_path_prefix` is set (e.g. `/myorg/prod/vpc`), the module writes `${prefix}/{id,cidr,internet_gateway_id,tasks_security_group_id}` as `String` parameters and `${prefix}/{public_subnet_ids,availability_zones}` as `StringList`.
 
 ## Usage with ECS Fargate
 

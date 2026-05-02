@@ -1,56 +1,55 @@
 # tundra
 
 <p align="center">
-  <img src="./docs/img/logo.png" alt="awebo" width="480" />
+  <img src="./docs/img/logo.png" alt="tundra" width="480" />
 </p>
 
-Terraform module library for the data lake. Companion to [`awebo`](#) (data lake utility).
+<p align="center">
+  <a href="#modules"><img src="https://img.shields.io/badge/terraform-%3E%3D%201.6.0-7B42BC?logo=terraform" alt="Terraform"></a>
+  <a href="#modules"><img src="https://img.shields.io/badge/aws--provider-~%3E%205.0-FF9900?logo=amazonwebservices" alt="AWS Provider"></a>
+  <img src="https://img.shields.io/badge/region-us--east--1-blue" alt="Region">
+</p>
 
-This repo holds **module definitions only**. A separate consumer repo wires these modules into account compositions and runs `terraform apply`.
+A small, opinionated Terraform module library for spinning up the AWS pieces of a Fargate-based data lake: S3 zones, operational buckets, a minimal VPC, and an ECS cluster with task roles and task definitions.
+
+This repository contains **module definitions only** — no backend config, no compositions, no apply pipeline. A consumer repository wires the modules together and runs `terraform apply`.
+
+## Why
+
+Most published Terraform modules optimise for breadth: every flag, every variant, every cloud quirk. Tundra optimises for *small, sharp defaults* that a single team can read in an afternoon:
+
+- Smallest viable VPC for Fargate (a `/27`, two `/28` public subnets, no NAT)
+- S3 buckets locked down by default (public access blocked, TLS-only, ownership enforced)
+- Optional SSM Parameter Store publication so downstream tools (Prefect, Airflow, Lambdas) can resolve resource IDs by name instead of hardcoding ARNs
+
+If you need a 200-variable VPC module, look elsewhere. If you want something you can fork and own, this is the size.
 
 ## Modules
 
 | module | purpose |
 |---|---|
-| [`datalake-buckets`](modules/datalake-buckets) | S3 buckets per zone (`raw`, `sot`, `smt`) |
+| [`datalake-buckets`](modules/datalake-buckets) | One S3 bucket per data lake zone (default `raw`, `sot`, `smt`) |
 | [`platform-buckets`](modules/platform-buckets) | Operational buckets (`tfstate`, `logs`, `artifacts`, `athena`) |
-| [`vpc`](modules/vpc) | Smallest VPC for Fargate (public subnets, no NAT) |
-| [`ecs-cluster`](modules/ecs-cluster) | ECS cluster with FARGATE + FARGATE_SPOT capacity providers |
-| [`ecs-task-definition`](modules/ecs-task-definition) | Awebo Fargate task definition + log group |
-| [`iam-container-role`](modules/iam-container-role) | Task role (Glue catalog + S3 RW) + execution role |
+| [`vpc`](modules/vpc) | Smallest Fargate-friendly VPC (public subnets, no NAT) |
+| [`ecs-cluster`](modules/ecs-cluster) | ECS cluster with `FARGATE` + `FARGATE_SPOT` capacity providers |
+| [`ecs-task-definition`](modules/ecs-task-definition) | Fargate task definition + CloudWatch log group |
+| [`iam-container-role`](modules/iam-container-role) | Task role (Glue catalog + S3 RW) and execution role |
+
+Each module has its own README with inputs, outputs, and usage notes.
 
 ## Conventions
 
-- **Region**: `us-east-1`
-- **Required tags** on every resource: `domain`, `platform`, `project`. Modules accept a `tags` map and validate these keys are present.
-- **Naming**: caller-driven via `name` / `name_prefix`. Suggested scheme: `${account}-${env}-...`.
+- **Region**: pinned to `us-east-1`.
+- **Required tags**: every module accepts a `tags` map and validates it contains `domain`, `platform`, and `project`.
+- **Naming**: caller-driven via `name` / `name_prefix`. Suggested scheme is `${account}-${env}-...`.
+- **SSM publication**: every resource-creating module accepts an optional `ssm_path_prefix`. When set, the module's outputs are also published to SSM Parameter Store under that path, which makes them queryable by service-account-style consumers without passing Terraform outputs around.
 
-## Versions
+## Requirements
 
 - Terraform `>= 1.6.0`
 - AWS provider `~> 5.0`
 
-## Pre-commit
-
-Quality checks run locally via [`pre-commit`](https://pre-commit.com). Configuration is in `.pre-commit-config.yaml`. Install once per checkout:
-
-```sh
-pip install pre-commit  # or: brew install pre-commit
-pre-commit install
-```
-
-Hooks:
-- `terraform_fmt`
-- `terraform_validate` (with `-backend=false`)
-- `terraform_tflint` (uses `.tflint.hcl`)
-- `terraform_trivy` (HIGH and CRITICAL only)
-- whitespace, EOF newline, YAML, merge-conflict, large-file checks
-
-Run against everything on demand: `pre-commit run --all-files`.
-
-This repo intentionally has no CI workflow — checks are enforced at commit time on every contributor's machine.
-
-## Consuming this repo
+## Usage
 
 Reference modules from a consumer repo via Git source:
 
@@ -62,15 +61,54 @@ module "buckets" {
   tags = {
     domain   = "data"
     platform = "datalake"
-    project  = "awebo"
+    project  = "example"
   }
+
+  # Optional: publish bucket IDs/ARNs to SSM so downstream tools can resolve them.
+  ssm_path_prefix = "/myorg/prod/datalake"
 }
 ```
 
-Pin `ref` to a tag (recommended) or commit SHA. Branches are not stable references.
+Pin `ref` to a tag (recommended) or a commit SHA. Branches are not stable references.
 
-The consumer repo is responsible for:
-- backend config (S3 + DynamoDB lock)
-- bootstrap stack (tfstate bucket, lock table, GitHub OIDC provider, CI deploy role)
+The consumer repo owns:
+
+- backend configuration (S3 + DynamoDB lock)
+- the bootstrap stack (tfstate bucket, lock table, OIDC provider, deploy role)
 - account compositions
 - the apply pipeline
+
+## Development
+
+Quality checks run locally via [`pre-commit`](https://pre-commit.com). Configuration lives in `.pre-commit-config.yaml`. Install once per checkout:
+
+```sh
+pip install pre-commit  # or: brew install pre-commit
+pre-commit install
+```
+
+Hooks:
+
+- `terraform_fmt`
+- `terraform_validate` (with `-backend=false`)
+- `terraform_tflint` (uses `.tflint.hcl`)
+- `terraform_trivy` (HIGH and CRITICAL only)
+- whitespace, EOF newline, YAML, merge-conflict, large-file checks
+
+Run against everything on demand:
+
+```sh
+pre-commit run --all-files
+```
+
+There is intentionally no CI workflow — checks are enforced at commit time on every contributor's machine.
+
+## Contributing
+
+Issues and PRs welcome. Code ownership is declared in [`.github/CODEOWNERS`](.github/CODEOWNERS); a maintainer review is expected before merge.
+
+For non-trivial changes, open an issue first to discuss scope.
+
+## License
+
+No license has been chosen yet. Until a `LICENSE` file is added, default copyright applies and external use is at the user's risk. Track this in [issue #2](https://github.com/samuel2pb/tundra/issues) (TODO).

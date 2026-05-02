@@ -14,9 +14,15 @@ Per bucket: versioning enabled, SSE (S3 or KMS), public access blocked, ownershi
 | `kms_key_arn` | string | `null` (uses AES256) | no |
 | `noncurrent_version_expiration_days` | number | `90` | no |
 | `abort_incomplete_multipart_upload_days` | number | `7` | no |
+| `ssm_path_prefix` | string | `null` | no — when set, publishes outputs to SSM Parameter Store |
 
 ## Outputs
 
 - `bucket_ids` — `{ zone => bucket_id }`
 - `bucket_arns` — `{ zone => arn }`
 - `bucket_domain_names` — `{ zone => regional_domain_name }`
+
+When `ssm_path_prefix` is set (e.g. `/myorg/prod/datalake`), one parameter is written per zone:
+
+- `${prefix}/bucket/${zone}/id`
+- `${prefix}/bucket/${zone}/arn`

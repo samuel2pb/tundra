@@ -23,6 +23,7 @@ Fargate-compatible ECS task definition with a single container, plus its CloudWa
 | `log_retention_days` | number | `7` | no |
 | `ephemeral_storage_gib` | number | `0` (Fargate default 21) | no |
 | `runtime_platform` | object | `LINUX` / `X86_64` | no |
+| `ssm_path_prefix` | string | `null` | no — when set, publishes outputs to SSM Parameter Store |
 
 ## Outputs
 
@@ -31,3 +32,5 @@ Fargate-compatible ECS task definition with a single container, plus its CloudWa
 - `family`, `revision`
 - `container_name`
 - `log_group_name`
+
+When `ssm_path_prefix` is set, the module writes `${prefix}/{task_definition_arn,task_definition_arn_without_revision,family,container_name,log_group_name}`.
