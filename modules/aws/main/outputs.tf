@@ -53,6 +53,11 @@ output "execution_role_arn" {
   value       = module.iam_container_role.execution_role_arn
 }
 
+output "lakeformation_registered_arns" {
+  description = "Map of zone => S3 ARN registered as Lake Formation data location. null when enable_lakeformation is false."
+  value       = var.enable_lakeformation ? module.lakeformation[0].registered_resource_arns : null
+}
+
 output "task_definition_arn" {
   description = "Task definition ARN. null when task_image was not provided."
   value       = local.create_task ? module.ecs_task_definition[0].task_definition_arn : null

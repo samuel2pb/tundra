@@ -87,6 +87,20 @@ variable "platform_buckets" {
   }
 }
 
+# --- Lake Formation ------------------------------------------------------
+
+variable "enable_lakeformation" {
+  description = "When true, registers datalake buckets as Lake Formation data locations with hybrid access and external engine filtering enabled."
+  type        = bool
+  default     = false
+}
+
+variable "lakeformation_admin_arns" {
+  description = "IAM principal ARNs granted Lake Formation admin."
+  type        = list(string)
+  default     = []
+}
+
 # --- ECS cluster ---------------------------------------------------------
 
 variable "default_capacity_provider" {

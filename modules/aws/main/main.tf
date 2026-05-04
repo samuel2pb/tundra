@@ -109,6 +109,17 @@ module "iam_container_role" {
   ssm_path_prefix = local.ssm_enabled ? "${local.ssm_root}/iam" : null
 }
 
+module "lakeformation" {
+  source = "../lakeformation"
+  count  = var.enable_lakeformation ? 1 : 0
+
+  bucket_arns = module.datalake_buckets.bucket_arns
+  admin_arns  = var.lakeformation_admin_arns
+  tags        = local.effective_tags
+
+  ssm_path_prefix = local.ssm_enabled ? "${local.ssm_root}/lakeformation" : null
+}
+
 module "ecs_task_definition" {
   source = "../ecs-task-definition"
   count  = local.create_task ? 1 : 0
