@@ -68,6 +68,12 @@ variable "datalake_zones" {
   default     = ["raw", "sot", "smt"]
 }
 
+variable "datalake_cors_allowed_origins" {
+  description = "Origins allowed in the CORS configuration for datalake buckets. Pass [] to skip CORS."
+  type        = list(string)
+  default     = []
+}
+
 variable "datalake_kms_key_arn" {
   description = "KMS key ARN for SSE-KMS on data lake buckets. null = AES256."
   type        = string

@@ -37,6 +37,12 @@ variable "abort_incomplete_multipart_upload_days" {
   default     = 7
 }
 
+variable "cors_allowed_origins" {
+  description = "Origins allowed in the CORS configuration for each bucket. Pass [] to skip CORS entirely."
+  type        = list(string)
+  default     = []
+}
+
 variable "ssm_path_prefix" {
   description = "If set, writes outputs to SSM Parameter Store under this path. e.g. /myorg/prod/datalake."
   type        = string

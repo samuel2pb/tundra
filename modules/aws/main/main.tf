@@ -66,10 +66,11 @@ module "vpc" {
 module "datalake_buckets" {
   source = "../datalake-buckets"
 
-  name_prefix = local.effective_name_prefix
-  zones       = var.datalake_zones
-  tags        = local.effective_tags
-  kms_key_arn = var.datalake_kms_key_arn
+  name_prefix          = local.effective_name_prefix
+  zones                = var.datalake_zones
+  tags                 = local.effective_tags
+  kms_key_arn          = var.datalake_kms_key_arn
+  cors_allowed_origins = var.datalake_cors_allowed_origins
 
   ssm_path_prefix = local.ssm_enabled ? "${local.ssm_root}/datalake" : null
 }

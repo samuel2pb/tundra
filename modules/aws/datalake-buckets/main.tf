@@ -58,6 +58,20 @@ resource "aws_s3_bucket_ownership_controls" "this" {
   }
 }
 
+resource "aws_s3_bucket_cors_configuration" "this" {
+  for_each = length(var.cors_allowed_origins) > 0 ? aws_s3_bucket.this : {}
+
+  bucket = each.value.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "HEAD"]
+    allowed_origins = var.cors_allowed_origins
+    expose_headers  = ["ETag", "Content-Length", "Content-Range"]
+    max_age_seconds = 3600
+  }
+}
+
 resource "aws_s3_bucket_lifecycle_configuration" "this" {
   for_each = aws_s3_bucket.this
 
