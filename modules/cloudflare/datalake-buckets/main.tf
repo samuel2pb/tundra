@@ -83,3 +83,10 @@ resource "cloudflare_r2_managed_domain" "this" {
   jurisdiction = var.jurisdiction
   enabled      = true
 }
+
+resource "cloudflare_r2_data_catalog" "this" {
+  for_each = var.enable_data_catalog ? cloudflare_r2_bucket.this : {}
+
+  account_id  = var.account_id
+  bucket_name = each.value.name
+}

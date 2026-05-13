@@ -71,6 +71,12 @@ variable "enable_managed_domain" {
   default     = false
 }
 
+variable "enable_data_catalog" {
+  description = "Enable R2 Data Catalog (managed Iceberg REST catalog) on each bucket."
+  type        = bool
+  default     = false
+}
+
 variable "lifecycle_rules" {
   description = "Additional lifecycle rules beyond the default multipart abort. Each rule specifies a prefix, whether to delete objects, and after how many days."
   type = list(object({

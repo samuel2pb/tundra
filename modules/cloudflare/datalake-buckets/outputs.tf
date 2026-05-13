@@ -22,3 +22,13 @@ output "managed_domain_urls" {
   description = "Map of zone => public r2.dev URL (only populated when enable_managed_domain = true)."
   value       = { for k, d in cloudflare_r2_managed_domain.this : k => "https://${d.domain}" }
 }
+
+output "data_catalog_uris" {
+  description = "Map of zone => Iceberg REST catalog URI (only populated when enable_data_catalog = true)."
+  value       = { for k, b in cloudflare_r2_bucket.this : k => "https://catalog.cloudflarestorage.com/${var.account_id}/${b.name}" if var.enable_data_catalog }
+}
+
+output "data_catalog_warehouses" {
+  description = "Map of zone => warehouse identifier for Iceberg clients (only populated when enable_data_catalog = true)."
+  value       = { for k, b in cloudflare_r2_bucket.this : k => "${var.account_id}_${b.name}" if var.enable_data_catalog }
+}
