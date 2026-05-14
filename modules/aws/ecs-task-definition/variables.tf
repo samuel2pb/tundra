@@ -35,44 +35,77 @@ variable "region" {
 }
 
 variable "cpu" {
-  description = "Task CPU units (Fargate)."
+  description = "Task CPU units."
   type        = string
   default     = "512"
 }
 
 variable "memory" {
-  description = "Task memory in MiB (Fargate)."
+  description = "Task memory in MiB."
   type        = string
   default     = "1024"
 }
 
+variable "requires_compatibilities" {
+  description = "Launch type compatibility. FARGATE, EC2, or both."
+  type        = list(string)
+  default     = ["FARGATE"]
+}
+
 variable "container_name" {
-  description = "Container name inside the task definition. Defaults to family."
+  description = "Primary container name inside the task definition. Defaults to family."
   type        = string
   default     = null
 }
 
 variable "command" {
-  description = "Override the container CMD. Empty list = use image default."
+  description = "Override the primary container CMD. Empty list = use image default."
   type        = list(string)
   default     = []
 }
 
 variable "entrypoint" {
-  description = "Override the container ENTRYPOINT. Empty list = use image default."
+  description = "Override the primary container ENTRYPOINT. Empty list = use image default."
   type        = list(string)
   default     = []
 }
 
 variable "environment" {
-  description = "Plain environment variables (non-secret)."
+  description = "Plain environment variables for the primary container."
   type        = list(object({ name = string, value = string }))
   default     = []
 }
 
 variable "secrets" {
-  description = "Secrets injected from Secrets Manager / SSM Parameter Store."
+  description = "Secrets injected from Secrets Manager / SSM Parameter Store into the primary container."
   type        = list(object({ name = string, valueFrom = string }))
+  default     = []
+}
+
+variable "port_mappings" {
+  description = "Port mappings for the primary container."
+  type = list(object({
+    containerPort = number
+    protocol      = optional(string, "tcp")
+  }))
+  default = []
+}
+
+variable "health_check" {
+  description = "Container-level health check for the primary container."
+  type = object({
+    command     = list(string)
+    interval    = optional(number, 30)
+    timeout     = optional(number, 5)
+    retries     = optional(number, 3)
+    startPeriod = optional(number, 60)
+  })
+  default = null
+}
+
+variable "sidecar_containers" {
+  description = "Additional container definitions (e.g. cloudflared, datadog-agent). Each is a full container definition map."
+  type        = list(any)
   default     = []
 }
 
@@ -95,7 +128,7 @@ variable "ephemeral_storage_gib" {
 }
 
 variable "runtime_platform" {
-  description = "OS / CPU architecture for Fargate."
+  description = "OS / CPU architecture."
   type = object({
     operating_system_family = string
     cpu_architecture        = string
@@ -107,7 +140,7 @@ variable "runtime_platform" {
 }
 
 variable "ssm_path_prefix" {
-  description = "If set, writes outputs to SSM Parameter Store under this path. e.g. /myorg/prod/ecs/task/awebo."
+  description = "If set, writes outputs to SSM Parameter Store under this path."
   type        = string
   default     = null
 }
