@@ -12,3 +12,8 @@ output "cluster_id" {
   description = "ECS cluster ID."
   value       = aws_ecs_cluster.this.id
 }
+
+output "ec2_capacity_provider_names" {
+  description = "Names of registered EC2 capacity providers."
+  value       = local.ec2_provider_names
+}
