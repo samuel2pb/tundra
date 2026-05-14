@@ -2,7 +2,7 @@ locals {
   container_name = coalesce(var.container_name, var.family)
   log_group_name = coalesce(var.log_group_name, "/ecs/${var.family}")
 
-  container_definition = merge(
+  primary_container = merge(
     {
       name      = local.container_name
       image     = var.image
@@ -21,7 +21,11 @@ locals {
     length(var.entrypoint) > 0 ? { entryPoint = var.entrypoint } : {},
     length(var.environment) > 0 ? { environment = var.environment } : {},
     length(var.secrets) > 0 ? { secrets = var.secrets } : {},
+    length(var.port_mappings) > 0 ? { portMappings = var.port_mappings } : {},
+    var.health_check != null ? { healthCheck = var.health_check } : {},
   )
+
+  all_containers = concat([local.primary_container], var.sidecar_containers)
 }
 
 resource "aws_cloudwatch_log_group" "this" {
@@ -33,7 +37,7 @@ resource "aws_cloudwatch_log_group" "this" {
 resource "aws_ecs_task_definition" "this" {
   family                   = var.family
   network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
+  requires_compatibilities = var.requires_compatibilities
   cpu                      = var.cpu
   memory                   = var.memory
   task_role_arn            = var.task_role_arn
@@ -51,7 +55,7 @@ resource "aws_ecs_task_definition" "this" {
     }
   }
 
-  container_definitions = jsonencode([local.container_definition])
+  container_definitions = jsonencode(local.all_containers)
 
   tags = merge(var.tags, { Name = var.family })
 

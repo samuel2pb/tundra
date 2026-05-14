@@ -17,11 +17,19 @@ variable "default_capacity_provider" {
   description = "Default capacity provider for tasks that do not specify one."
   type        = string
   default     = "FARGATE_SPOT"
+}
 
-  validation {
-    condition     = contains(["FARGATE", "FARGATE_SPOT"], var.default_capacity_provider)
-    error_message = "default_capacity_provider must be FARGATE or FARGATE_SPOT."
-  }
+variable "ec2_capacity_providers" {
+  description = "EC2 Auto Scaling Group-backed capacity providers to register with the cluster."
+  type = list(object({
+    name                           = string
+    asg_arn                        = string
+    target_capacity                = optional(number, 100)
+    minimum_scaling_step_size      = optional(number, 1)
+    maximum_scaling_step_size      = optional(number, 1)
+    managed_termination_protection = optional(bool, false)
+  }))
+  default = []
 }
 
 variable "enable_container_insights" {
