@@ -52,6 +52,17 @@ variable "requires_compatibilities" {
   default     = ["FARGATE"]
 }
 
+variable "network_mode" {
+  description = "Docker networking mode: awsvpc, bridge, or host."
+  type        = string
+  default     = "awsvpc"
+
+  validation {
+    condition     = contains(["awsvpc", "bridge", "host", "none"], var.network_mode)
+    error_message = "network_mode must be awsvpc, bridge, host, or none."
+  }
+}
+
 variable "container_name" {
   description = "Primary container name inside the task definition. Defaults to family."
   type        = string

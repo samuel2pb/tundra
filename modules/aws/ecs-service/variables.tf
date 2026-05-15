@@ -38,6 +38,12 @@ variable "capacity_provider_strategy" {
   }))
 }
 
+variable "network_mode" {
+  description = "Task definition network mode. Controls whether network_configuration is set."
+  type        = string
+  default     = "awsvpc"
+}
+
 variable "subnet_ids" {
   description = "Subnet IDs for task network interfaces."
   type        = list(string)

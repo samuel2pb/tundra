@@ -36,7 +36,7 @@ resource "aws_cloudwatch_log_group" "this" {
 
 resource "aws_ecs_task_definition" "this" {
   family                   = var.family
-  network_mode             = "awsvpc"
+  network_mode             = var.network_mode
   requires_compatibilities = var.requires_compatibilities
   cpu                      = var.cpu
   memory                   = var.memory

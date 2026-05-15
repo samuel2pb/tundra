@@ -13,10 +13,13 @@ resource "aws_ecs_service" "this" {
     }
   }
 
-  network_configuration {
-    subnets          = var.subnet_ids
-    security_groups  = var.security_group_ids
-    assign_public_ip = var.assign_public_ip
+  dynamic "network_configuration" {
+    for_each = var.network_mode == "awsvpc" ? [1] : []
+    content {
+      subnets          = var.subnet_ids
+      security_groups  = var.security_group_ids
+      assign_public_ip = var.assign_public_ip
+    }
   }
 
   deployment_circuit_breaker {
