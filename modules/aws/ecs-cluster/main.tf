@@ -19,7 +19,7 @@ resource "aws_ecs_capacity_provider" "ec2" {
     managed_termination_protection = each.value.managed_termination_protection ? "ENABLED" : "DISABLED"
 
     managed_scaling {
-      status                    = "ENABLED"
+      status                    = each.value.managed_scaling ? "ENABLED" : "DISABLED"
       target_capacity           = each.value.target_capacity
       minimum_scaling_step_size = each.value.minimum_scaling_step_size
       maximum_scaling_step_size = each.value.maximum_scaling_step_size

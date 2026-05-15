@@ -24,6 +24,7 @@ variable "ec2_capacity_providers" {
   type = list(object({
     name                           = string
     asg_arn                        = string
+    managed_scaling                = optional(bool, true)
     target_capacity                = optional(number, 100)
     minimum_scaling_step_size      = optional(number, 1)
     maximum_scaling_step_size      = optional(number, 1)
