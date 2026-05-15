@@ -97,6 +97,7 @@ variable "port_mappings" {
   description = "Port mappings for the primary container."
   type = list(object({
     containerPort = number
+    hostPort      = optional(number)
     protocol      = optional(string, "tcp")
   }))
   default = []
