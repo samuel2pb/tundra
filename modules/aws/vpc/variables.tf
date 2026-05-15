@@ -30,6 +30,12 @@ variable "az_count" {
   }
 }
 
+variable "map_public_ip_on_launch" {
+  description = "Auto-assign public IPs to instances in public subnets."
+  type        = bool
+  default     = true
+}
+
 variable "ssm_path_prefix" {
   description = "If set, writes outputs to SSM Parameter Store under this path. e.g. /myorg/prod/vpc."
   type        = string
