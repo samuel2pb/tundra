@@ -1,8 +1,10 @@
 resource "aws_ecs_service" "this" {
-  name            = var.name
-  cluster         = var.cluster_arn
-  task_definition = var.task_definition_arn
-  desired_count   = var.desired_count
+  name                               = var.name
+  cluster                            = var.cluster_arn
+  task_definition                    = var.task_definition_arn
+  desired_count                      = var.desired_count
+  deployment_minimum_healthy_percent = var.deployment_minimum_healthy_percent
+  deployment_maximum_percent         = var.deployment_maximum_percent
 
   dynamic "capacity_provider_strategy" {
     for_each = var.capacity_provider_strategy

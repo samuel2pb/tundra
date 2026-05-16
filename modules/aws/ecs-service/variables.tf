@@ -78,6 +78,18 @@ variable "wait_for_steady_state" {
   default     = false
 }
 
+variable "deployment_minimum_healthy_percent" {
+  description = "Lower limit (as percent of desired_count) of running tasks that must remain healthy during a deployment. Set to 0 to allow ECS to stop the old task before starting the new one (useful for single-instance host-network services where the port would otherwise conflict). AWS default is 100."
+  type        = number
+  default     = 100
+}
+
+variable "deployment_maximum_percent" {
+  description = "Upper limit (as percent of desired_count) of running tasks during a deployment. Set to 100 alongside minimum_healthy_percent=0 to enforce a strict in-place replacement (one task at a time). AWS default is 200."
+  type        = number
+  default     = 200
+}
+
 variable "ssm_path_prefix" {
   description = "If set, writes outputs to SSM Parameter Store under this path."
   type        = string
