@@ -118,7 +118,7 @@ variable "default_capacity_provider" {
 variable "enable_container_insights" {
   description = "Enable CloudWatch Container Insights on the cluster."
   type        = bool
-  default     = true
+  default     = false
 }
 
 # --- IAM container role --------------------------------------------------
