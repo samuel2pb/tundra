@@ -36,7 +36,7 @@ variable "ec2_capacity_providers" {
 variable "enable_container_insights" {
   description = "Enable CloudWatch Container Insights on the cluster."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "ssm_path_prefix" {
