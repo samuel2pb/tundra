@@ -12,7 +12,7 @@ locals {
     }
     artifacts = {
       versioning                 = true
-      expiration_days            = 30
+      expiration_days            = 0
       noncurrent_expiration_days = 30
     }
     athena = {
