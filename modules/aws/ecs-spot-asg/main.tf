@@ -72,9 +72,9 @@ resource "aws_iam_instance_profile" "this" {
 # ── Launch template ──────────────────────────────────────────────────────────
 
 resource "aws_launch_template" "this" {
-  name_prefix   = "${var.name}-"
-  image_id      = local.ami_id
-  user_data     = local.user_data
+  name_prefix = "${var.name}-"
+  image_id    = local.ami_id
+  user_data   = local.user_data
 
   iam_instance_profile {
     arn = aws_iam_instance_profile.this.arn
@@ -153,8 +153,8 @@ resource "aws_autoscaling_group" "this" {
 
   dynamic "tag" {
     for_each = merge(var.tags, {
-      Name                 = "${var.name}-ecs"
-      AmazonECSManaged     = "true"
+      Name             = "${var.name}-ecs"
+      AmazonECSManaged = "true"
     })
     content {
       key                 = tag.key
