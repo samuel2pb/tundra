@@ -16,6 +16,17 @@ Modules are organised by provider under `modules/<provider>/`. The library curre
 
 This repository contains **module definitions only** — no backend config, no compositions, no apply pipeline. A consumer repository wires the modules together and runs `terraform apply`.
 
+tundra is the infrastructure half of a two-repo framework. The runtime half is [**awebo**](https://github.com/samuel2pb/awebo), a DuckDB + PyIceberg job runner that executes inside the Fargate tasks these modules create. Together they give anyone efficient, extremely cheap data pipelines: no clusters, no warehouse licence, no idle servers.
+
+## What it costs
+
+| Workload | Per day | Per month |
+| --- | ---: | ---: |
+| 1 daily job, 0.5 vCPU / 1 GB, 5 min on Fargate Spot, 10 GB lake | ≈ $0.02 | ≈ $0.53 |
+| 24 hourly jobs, 2 vCPU / 4 GB, 10 min on Spot, 100 GB lake | ≈ $0.89 | ≈ $27 |
+
+us-east-1 list prices, November 2026. Everything tundra creates that is *not* a running task costs $0: the VPC has no NAT gateway (the single largest fixed cost in most "minimal" stacks), SSM standard parameters are free, Glue Data Catalog is free under 1M objects, and the buckets only bill for what you store and request. The default capacity provider is `FARGATE_SPOT` (≈ 69% below on-demand). Line-by-line model, unit prices and sources: [awebo `docs/COSTS.md`](https://github.com/samuel2pb/awebo/blob/main/docs/COSTS.md).
+
 ## Why
 
 Most published Terraform modules optimise for breadth: every flag, every variant, every cloud quirk. Tundra optimises for *small, sharp defaults* that a single team can read in an afternoon:
@@ -123,6 +134,7 @@ pre-commit install
 
 Hooks:
 
+- `gitleaks` (secret scan, also runs in CI on every push and PR)
 - `terraform_fmt`
 - `terraform_validate` (with `-backend=false`)
 - `terraform_tflint` (uses `.tflint.hcl`)
@@ -135,7 +147,7 @@ Run against everything on demand:
 pre-commit run --all-files
 ```
 
-There is intentionally no CI workflow — checks are enforced at commit time on every contributor's machine.
+Terraform checks are enforced at commit time on every contributor's machine; the only CI workflow is the secret scan. See [`SECURITY.md`](./SECURITY.md) for how to report vulnerabilities.
 
 ## Contributing
 
@@ -145,4 +157,4 @@ For non-trivial changes, open an issue first to discuss scope.
 
 ## License
 
-No license has been chosen yet. Until a `LICENSE` file is added, default copyright applies and external use is at the user's risk. Track this in [issue #2](https://github.com/samuel2pb/tundra/issues) (TODO).
+Apache 2.0. See [`LICENSE`](./LICENSE).

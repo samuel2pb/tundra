@@ -9,7 +9,7 @@ variable "account_id" {
 }
 
 variable "account_name" {
-  description = "Short, friendly name for the account (e.g. \"prod\", \"dodpit\"). Used as the default name prefix for every child resource and inserted into the default ssm_path_prefix."
+  description = "Short, friendly name for the account (e.g. \"prod\", \"dev\"). Used as the default name prefix for every child resource and inserted into the default ssm_path_prefix."
   type        = string
 
   validation {
